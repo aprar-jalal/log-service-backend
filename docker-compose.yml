@@ -1,0 +1,72 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: logs
+      POSTGRES_PASSWORD: logs
+      POSTGRES_DB: logs
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    # Tuned for the 1 CPU / 1GB RAM limit below: shared_buffers ~25% of RAM,
+    # generous max_wal_size so checkpoints don't thrash under sustained
+    # 15k+ rows/sec ingestion, and enough autovacuum workers to keep up.
+    command:
+      - postgres
+      - -c
+      - shared_buffers=256MB
+      - -c
+      - work_mem=16MB
+      - -c
+      - maintenance_work_mem=128MB
+      - -c
+      - max_wal_size=2GB
+      - -c
+      - checkpoint_timeout=15min
+      - -c
+      - effective_cache_size=768MB
+      - -c
+      - synchronous_commit=off
+      - -c
+      - max_connections=100
+      - -c
+      - autovacuum_max_workers=3
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U logs -d logs"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    cpus: 1.0
+    mem_limit: 1g
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PORT: 8080
+      DATABASE_URL: postgres://logs:logs@postgres:5432/logs
+      RETENTION_DAYS: ${RETENTION_DAYS:-30}
+      AUTH_ENABLED: ${AUTH_ENABLED:-false}
+      LOADGEN_API_KEY: ${LOADGEN_API_KEY:-}
+      RATE_LIMIT_ENABLED: ${RATE_LIMIT_ENABLED:-false}
+    ports:
+      - "8080:8080"
+    cpus: 0.5
+    mem_limit: 256m
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: ${FRONTEND_API_BASE_URL:-http://localhost:8080}
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
+volumes:
+  pgdata:
