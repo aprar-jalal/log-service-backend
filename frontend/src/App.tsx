@@ -1,13 +1,24 @@
 import { useEffect, useState } from "react";
-import { fetchAggregate, fetchHealth, fetchLogs, type AggregateBucket, type Filters, type LogEntry } from "./api";
+import {
+  fetchAggregate,
+  fetchHealth,
+  fetchLogs,
+  type AggregateBucket,
+  type Filters,
+  type LogEntry,
+} from "./api";
 import { FiltersBar } from "./components/FiltersBar";
 import { LogsTable } from "./components/LogsTable";
 import { AggregateChart } from "./components/AggregateChart";
 
 function localToIso(local: string | undefined): string | undefined {
   if (!local) return undefined;
+
   const d = new Date(local);
-  return Number.isNaN(d.getTime()) ? undefined : d.toISOString();
+
+  return Number.isNaN(d.getTime())
+    ? undefined
+    : d.toISOString();
 }
 
 export default function App() {
@@ -17,7 +28,8 @@ export default function App() {
   const [loadingLogs, setLoadingLogs] = useState(false);
   const [buckets, setBuckets] = useState<AggregateBucket[]>([]);
   const [loadingAgg, setLoadingAgg] = useState(false);
-  const [bucketSize, setBucketSize] = useState<"1m" | "5m" | "1h" | "1d">("5m");
+  const [bucketSize, setBucketSize] =
+    useState<"1m" | "5m" | "1h" | "1d">("5m");
   const [online, setOnline] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,9 +44,17 @@ export default function App() {
   async function loadLogs(reset: boolean) {
     setLoadingLogs(true);
     setError(null);
+
     try {
-      const res = await fetchLogs(apiFilters, reset ? null : cursor);
-      setLogs((prev) => (reset ? res.logs : [...prev, ...res.logs]));
+      const res = await fetchLogs(
+        apiFilters,
+        reset ? null : cursor
+      );
+
+      setLogs((prev) =>
+        reset ? res.logs : [...prev, ...res.logs]
+      );
+
       setCursor(res.next_cursor);
     } catch (e) {
       setError((e as Error).message);
@@ -45,10 +65,25 @@ export default function App() {
 
   async function loadAggregate() {
     setLoadingAgg(true);
+
     try {
-      const until = apiFilters.until ?? new Date().toISOString();
-      const since = apiFilters.since ?? new Date(Date.now() - 60 * 60 * 1000).toISOString();
-      const res = await fetchAggregate(apiFilters, since, until, bucketSize);
+      const until =
+        apiFilters.until ??
+        new Date().toISOString();
+
+      const since =
+        apiFilters.since ??
+        new Date(
+          Date.now() - 60 * 60 * 1000
+        ).toISOString();
+
+      const res = await fetchAggregate(
+        apiFilters,
+        since,
+        until,
+        bucketSize
+      );
+
       setBuckets(res.buckets);
     } catch (e) {
       setError((e as Error).message);
@@ -76,6 +111,7 @@ export default function App() {
     const id = setInterval(() => {
       fetchHealth().then(setOnline);
     }, 5000);
+
     return () => clearInterval(id);
   }, []);
 
@@ -83,25 +119,100 @@ export default function App() {
     <div className="app">
       <header className="topbar">
         <div className="brand">
-          <span className="brand-mark">
-            pulse<span>.</span>logs
-          </span>
-          <span className="brand-sub">ingestion &amp; query console</span>
+          <div className="brand-logo">&gt;_</div>
+
+          <div>
+            <div className="brand-mark">
+              pulse<span>.logs</span>
+            </div>
+
+            <div className="brand-sub">
+              log query console
+            </div>
+          </div>
         </div>
-        <div className="status">
-          <span className={`pulse-dot ${online ? "" : "offline"}`} />
-          {online ? "connected" : "unreachable"}
+
+        <div className={`status ${online ? "" : "offline"}`}>
+          <span className="status-dot" />
+          {online ? "API connected" : "API unreachable"}
         </div>
       </header>
 
       <main className="main">
-        <FiltersBar filters={filters} onChange={setFilters} onRefresh={refresh} />
+        <section className="page-header">
+          <div>
+            <div className="eyebrow">
+              Observability / Query
+            </div>
 
-        {error && <div className="error-banner">{error}</div>}
+            <h1>Log Explorer</h1>
 
-        <div className="grid-two">
-          <LogsTable logs={logs} loading={loadingLogs} hasMore={cursor !== null} onLoadMore={() => loadLogs(false)} />
-          <AggregateChart buckets={buckets} bucketSize={bucketSize} onBucketSizeChange={setBucketSize} loading={loadingAgg} />
+            <p>
+              Search, filter and inspect application events.
+            </p>
+          </div>
+
+          <button
+            className="btn btn-primary"
+            onClick={refresh}
+          >
+            ↻ Refresh data
+          </button>
+        </section>
+
+        <FiltersBar
+          filters={filters}
+          onChange={setFilters}
+          onRefresh={refresh}
+        />
+
+        {error && (
+          <div className="error-banner">
+            <span className="error-icon">!</span>
+            {error}
+          </div>
+        )}
+
+        <div className="query-summary">
+          <span className="query-label">QUERY</span>
+
+          <code className="query-code">
+            {filters.q
+              ? `message:"${filters.q}"`
+              : filters.service
+                ? `service:"${filters.service}"`
+                : "all logs"}
+          </code>
+
+          <div className="chips">
+            {filters.level && (
+              <span className="chip">
+                level:{filters.level}
+              </span>
+            )}
+
+            {filters.service && (
+              <span className="chip">
+                service:{filters.service}
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="dashboard">
+          <LogsTable
+            logs={logs}
+            loading={loadingLogs}
+            hasMore={cursor !== null}
+            onLoadMore={() => loadLogs(false)}
+          />
+
+          <AggregateChart
+            buckets={buckets}
+            bucketSize={bucketSize}
+            onBucketSizeChange={setBucketSize}
+            loading={loadingAgg}
+          />
         </div>
       </main>
     </div>

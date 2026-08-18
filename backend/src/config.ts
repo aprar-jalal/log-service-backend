@@ -31,8 +31,8 @@ export const config = {
   rateLimitPerSecond: int(process.env.RATE_LIMIT_PER_SECOND, 20_000),
 
   // Ingestion batch insert chunk size (rows per multi-row INSERT statement).
-  insertChunkSize: int(process.env.INSERT_CHUNK_SIZE, 2000),
+  insertChunkSize: int(process.env.INSERT_CHUNK_SIZE, 10000),
 
   // Postgres pool sizing. Kept modest since Postgres has 1 CPU / 1GB RAM.
-  pgPoolMax: int(process.env.PG_POOL_MAX, 12),
+  pgPoolMax: int(process.env.PG_POOL_MAX, 2),
 };

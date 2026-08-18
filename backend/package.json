@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json && mkdir -p dist/db/migrations && cp src/db/migrations/*.sql dist/db/migrations/",
     "start": "node dist/server.js",
@@ -13,6 +15,7 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
+    "@fastify/cors": "^8.5.0",
     "fastify": "^4.28.1",
     "pg": "^8.12.0"
   },

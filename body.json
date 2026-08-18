@@ -1,0 +1,52 @@
+﻿{
+  "logs": [
+    {
+      "timestamp": "2026-08-17T11:30:00.000Z",
+      "level": "info",
+      "service": "auth-service",
+      "message": "User logged in",
+      "attributes": {
+        "userId": "123",
+        "method": "email"
+      }
+    },
+    {
+      "timestamp": "2026-08-17T11:31:00.000Z",
+      "level": "error",
+      "service": "payment-service",
+      "message": "Payment failed",
+      "attributes": {
+        "orderId": "456",
+        "reason": "insufficient funds"
+      }
+    },
+    {
+      "timestamp": "2026-08-17T11:32:00.000Z",
+      "level": "warn",
+      "service": "api-service",
+      "message": "High response time detected",
+      "attributes": {
+        "responseTime": 1200
+      }
+    },
+    {
+      "timestamp": "2026-08-17T11:33:00.000Z",
+      "level": "debug",
+      "service": "database-service",
+      "message": "Database query executed",
+      "attributes": {
+        "query": "SELECT users",
+        "duration": 25
+      }
+    },
+    {
+      "timestamp": "2026-08-17T11:34:00.000Z",
+      "level": "info",
+      "service": "notification-service",
+      "message": "Email notification sent",
+      "attributes": {
+        "recipient": "user@example.com"
+      }
+    }
+  ]
+}

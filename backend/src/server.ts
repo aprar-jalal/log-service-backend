@@ -1,4 +1,5 @@
 import Fastify from "fastify";
+import cors from "@fastify/cors";
 import { config } from "./config.js";
 import { runMigrations } from "./db/migrate.js";
 import { readiness } from "./lib/readiness.js";
@@ -10,18 +11,33 @@ import { aggregateRoutes } from "./routes/aggregate.js";
 
 const app = Fastify({
   logger: { level: process.env.LOG_LEVEL ?? "info" },
-  bodyLimit: 25 * 1024 * 1024, // batches can be large; 25MB is generous headroom
+  bodyLimit: 25 * 1024 * 1024,
 });
 
+await app.register(cors, {
+  origin: "http://localhost:5173",
+});
 // Malformed JSON must yield the same 400 contract as other bad requests,
 // not a generic 500.
 app.setErrorHandler((err, req, reply) => {
+  req.log.error({
+    err,
+    method: req.method,
+    url: req.url,
+    headers: req.headers,
+  }, "REQUEST ERROR");
+
   if ((err as { statusCode?: number }).statusCode === 400) {
-    reply.code(400).send({ error: "malformed request body" });
+    reply.code(400).send({
+      error: "malformed request body",
+      details: err.message,
+    });
     return;
   }
-  req.log.error(err);
-  reply.code(500).send({ error: "internal server error" });
+
+  reply.code(500).send({
+    error: "internal server error",
+  });
 });
 
 // --- Optional feature: rate limiting, off by default. When enabled, the
