@@ -40,10 +40,6 @@ app.setErrorHandler((err, req, reply) => {
   });
 });
 
-// --- Optional feature: rate limiting, off by default. When enabled, the
-// seeded load generator key is always exempt, per the load-generator
-// contract. This is a simple fixed-window counter — enough to shed load
-// under a genuine spike without adding an external dependency. ---
 let windowStart = Date.now();
 let windowCount = 0;
 app.addHook("onRequest", async (req, reply) => {
@@ -52,7 +48,7 @@ app.addHook("onRequest", async (req, reply) => {
 
   const authHeader = req.headers["authorization"];
   if (config.loadgenApiKey && typeof authHeader === "string" && authHeader.includes(config.loadgenApiKey)) {
-    return; // seeded load generator key is always exempt
+    return; 
   }
 
   const now = Date.now();
@@ -73,7 +69,7 @@ await app.register(aggregateRoutes);
 async function main(): Promise<void> {
   await runMigrations();
   await seedLoadgenKey();
-  await runRetentionSweep(); // ensure current/near-future partitions exist before accepting traffic
+  await runRetentionSweep(); 
   startRetentionLoop();
 
   readiness.ready = true;

@@ -1,8 +1,5 @@
 import type { Cursor } from "../types.js";
 
-/** Cursors are opaque to callers, base64url-encoded JSON of the last row's
- * (ts, id) — the same pair the ORDER BY / keyset predicate uses, so paging
- * is a plain index range scan rather than an OFFSET scan. */
 export function encodeCursor(cursor: Cursor): string {
   return Buffer.from(JSON.stringify(cursor), "utf8").toString("base64url");
 }

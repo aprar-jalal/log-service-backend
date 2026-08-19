@@ -5,10 +5,6 @@ function toDateOnly(d: Date): string {
   return d.toISOString().slice(0, 10);
 }
 
-/** Ensures the near-future partitions exist and drops partitions fully
- * outside the retention window. Uses DROP TABLE on individual day
- * partitions rather than DELETE, so retention never runs a long-running
- * scan/lock against live data and never competes with autovacuum. */
 export async function runRetentionSweep(): Promise<void> {
   const now = new Date();
 
@@ -36,7 +32,6 @@ export async function runRetentionSweep(): Promise<void> {
     const partitionDay = new Date(Date.UTC(Number(y), Number(m) - 1, Number(d)));
     if (partitionDay.getTime() < cutoff.getTime()) {
       await pool.query("SELECT drop_log_partition($1::date)", [toDateOnly(partitionDay)]);
-      // eslint-disable-next-line no-console
       console.log(`[retention] dropped expired partition ${relname}`);
     }
   }
@@ -45,7 +40,6 @@ export async function runRetentionSweep(): Promise<void> {
 export function startRetentionLoop(): NodeJS.Timeout {
   return setInterval(() => {
     runRetentionSweep().catch((err) => {
-      // eslint-disable-next-line no-console
       console.error("[retention] sweep failed", err);
     });
   }, config.retentionSweepIntervalMs);

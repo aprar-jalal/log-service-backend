@@ -13,7 +13,7 @@ export interface RawLogEntry {
 }
 
 export interface ValidatedLogEntry {
-  timestamp: string; // ISO 8601, normalized
+  timestamp: string;
   level: LogLevel;
   service: string;
   message: string;
@@ -35,6 +35,6 @@ export interface LogRow {
 }
 
 export interface Cursor {
-  ts: string; // ISO timestamp of the last row seen
-  id: string; // bigint id of the last row seen, as string
+  ts: string;
+  id: string; 
 }

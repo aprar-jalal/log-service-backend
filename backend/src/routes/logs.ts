@@ -26,9 +26,7 @@ async function insertAccepted(entries: ValidatedLogEntry[]): Promise<void> {
       message.push(e.message);
       attributes.push(JSON.stringify(e.attributes));
     }
-    // Multi-row insert via unnest: one round trip and one statement per
-    // chunk instead of one round trip per row, which is what lets ingestion
-    // scale to 15k+ rows/sec against a 1-CPU Postgres instance.
+    
     await pool.query(
       `INSERT INTO logs (ts, level, service, message, attributes)
        SELECT * FROM unnest(

@@ -36,7 +36,6 @@ export function validateEntry(raw: RawLogEntry, now: Date = new Date()): Validat
     return { ok: false, reason: "entry must be an object" };
   }
 
-  // timestamp
   if (typeof raw.timestamp !== "string" || raw.timestamp.trim() === "") {
     return { ok: false, reason: "timestamp is required" };
   }
@@ -48,17 +47,14 @@ export function validateEntry(raw: RawLogEntry, now: Date = new Date()): Validat
     return { ok: false, reason: "timestamp is more than five minutes in the future" };
   }
 
-  // level
   if (typeof raw.level !== "string" || !LOG_LEVELS.includes(raw.level as (typeof LOG_LEVELS)[number])) {
     return { ok: false, reason: `invalid level: '${String(raw.level)}'` };
   }
 
-  // service
   if (typeof raw.service !== "string" || raw.service.trim() === "") {
     return { ok: false, reason: "service is required and must be a non-empty string" };
   }
 
-  // message
   if (typeof raw.message !== "string" || raw.message.trim() === "") {
     return { ok: false, reason: "message is required and must be a non-empty string" };
   }

@@ -11,9 +11,7 @@ export interface ParsedFilters {
   q?: string;
 }
 
-/** Parses the filter query params shared by GET /logs and GET /logs/aggregate.
- * Throws QueryParamError with a human-readable message on invalid input;
- * callers turn that into the required `{"error": "..."}` 400 response. */
+
 export function parseFilters(query: Record<string, unknown>): ParsedFilters {
   const filters: ParsedFilters = { attrFilters: [] };
 
@@ -60,9 +58,7 @@ export function parseFilters(query: Record<string, unknown>): ParsedFilters {
   return filters;
 }
 
-/** Builds a parameterized WHERE clause (never string-interpolates values)
- * from parsed filters. Returns the SQL fragment (starting with "WHERE" or
- * empty) and the ordered param array; caller appends further params after. */
+
 export function buildWhere(filters: ParsedFilters, startParamIndex = 1): { sql: string; params: unknown[] } {
   const clauses: string[] = [];
   const params: unknown[] = [];

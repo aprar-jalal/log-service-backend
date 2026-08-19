@@ -6,9 +6,6 @@ import { pool } from "./pool.js";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const MIGRATIONS_DIR = join(__dirname, "migrations");
 
-/** Runs every .sql file in db/migrations, in filename order, inside its own
- * transaction. Each migration is idempotent (CREATE IF NOT EXISTS / ON
- * CONFLICT DO NOTHING) so re-running on every boot is safe. */
 export async function runMigrations(): Promise<void> {
   const files = readdirSync(MIGRATIONS_DIR)
     .filter((f) => f.endsWith(".sql"))
@@ -22,7 +19,6 @@ export async function runMigrations(): Promise<void> {
       try {
         await client.query(sql);
         await client.query("COMMIT");
-        // eslint-disable-next-line no-console
         console.log(`[migrate] applied ${file}`);
       } catch (err) {
         await client.query("ROLLBACK");
@@ -34,7 +30,6 @@ export async function runMigrations(): Promise<void> {
   }
 }
 
-// Allow `node dist/db/migrate.js` standalone invocation.
 if (process.argv[1] && process.argv[1].endsWith("migrate.js")) {
   runMigrations()
     .then(() => {

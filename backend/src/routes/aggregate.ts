@@ -40,11 +40,7 @@ export async function aggregateRoutes(app: FastifyInstance): Promise<void> {
     const bucketParamIdx = params.length;
     const groupExpr = groupBy ? groupBy : "NULL";
 
-    // date_bin is a single native call per row (vs. extract/floor/to_timestamp
-    // composed in SQL), which roughly halves aggregation time over large
-    // scans — the difference between meeting and missing the <1s p95 target
-    // at ~1M rows. Origin '2000-01-01' keeps bucket boundaries stable and
-    // aligned to UTC midnight regardless of query range.
+  
     const sql = `
       SELECT
         date_bin($${bucketParamIdx}::interval, ts, TIMESTAMPTZ '2000-01-01') AS bucket_start,

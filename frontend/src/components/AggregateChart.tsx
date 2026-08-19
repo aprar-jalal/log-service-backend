@@ -62,9 +62,7 @@ export function AggregateChart({
           className="bucket"
           value={bucketSize}
           onChange={(e) =>
-            onBucketSizeChange(
-              e.target.value as "1m" | "5m" | "1h" | "1d"
-            )
+            onBucketSizeChange(e.target.value as "1m" | "5m" | "1h" | "1d")
           }
         >
           <option value="1m">1 min</option>
@@ -90,13 +88,7 @@ export function AggregateChart({
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={points}>
               <defs>
-                <linearGradient
-                  id="fillCount"
-                  x1="0"
-                  y1="0"
-                  x2="0"
-                  y2="1"
-                >
+                <linearGradient id="fillCount" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#5b5ce2" stopOpacity={0.2} />
                   <stop offset="100%" stopColor="#5b5ce2" stopOpacity={0.01} />
                 </linearGradient>
